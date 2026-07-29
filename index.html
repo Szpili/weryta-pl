@@ -18,6 +18,7 @@
   --contradicted:#c23b3b; --contradicted-bg:#f9e9e7;
   --unknown:#a9760f; --unknown-bg:#f6efe1;
   --derived:#3d67a8; --derived-bg:#e9eef8;
+  --ambiguous:#8a5cc4; --associated:#6b7787;
   --serif:"Iowan Old Style",Georgia,"Times New Roman",serif;
   --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,sans-serif;
   --mono:ui-monospace,"SF Mono","JetBrains Mono","Cascadia Code",Menlo,monospace;
@@ -29,6 +30,7 @@
   --contradicted:#ec7b72; --contradicted-bg:#2b1a17;
   --unknown:#dba43e; --unknown-bg:#282011;
   --derived:#7ea6e6; --derived-bg:#141e2c;
+  --ambiguous:#b490e8; --associated:#8e9aa8;
 }}
 :root[data-theme="dark"]{
   --paper:#0d1217; --card:#151c23; --ink:#e7edf3; --muted:#94a2b0;
@@ -37,6 +39,7 @@
   --contradicted:#ec7b72; --contradicted-bg:#2b1a17;
   --unknown:#dba43e; --unknown-bg:#282011;
   --derived:#7ea6e6; --derived-bg:#141e2c;
+  --ambiguous:#b490e8; --associated:#8e9aa8;
 }
 :root[data-theme="light"]{
   --paper:#eceff3; --card:#ffffff; --ink:#141a20; --muted:#59646f;
@@ -45,6 +48,7 @@
   --contradicted:#c23b3b; --contradicted-bg:#f9e9e7;
   --unknown:#a9760f; --unknown-bg:#f6efe1;
   --derived:#3d67a8; --derived-bg:#e9eef8;
+  --ambiguous:#8a5cc4; --associated:#6b7787;
 }
 *{box-sizing:border-box}
 body{background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.55;margin:0;-webkit-font-smoothing:antialiased}
@@ -68,10 +72,19 @@ section{padding:52px 24px}
 .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;margin:0 0 8px}
 h2{font-family:var(--serif);font-size:28px;font-weight:600;margin:0 0 10px;letter-spacing:-.01em;text-wrap:balance}
 .sub{font-size:16px;color:var(--muted);max-width:62ch;margin:0 0 28px}
-.verdicts{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:0}
+.verdicts{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:12px;margin:0}
 .v{border:1px solid var(--line);border-radius:11px;background:var(--card);padding:16px 16px 18px;border-top:3px solid var(--vc)}
 .v.entailed{--vc:var(--entailed)} .v.contradicted{--vc:var(--contradicted)}
 .v.unknown{--vc:var(--unknown)} .v.derived{--vc:var(--derived)}
+.v.ambiguous{--vc:var(--ambiguous)} .v.associated{--vc:var(--associated)}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin:22px 0 0}
+.metric{border:1px solid var(--line);border-radius:11px;background:var(--card);padding:16px 18px}
+.metric .n{font-family:var(--serif);font-size:30px;font-weight:600;line-height:1;color:var(--ink)}
+.metric .l{font-size:13px;color:var(--muted);margin:7px 0 0}
+.note{font-size:13px;color:var(--muted);max-width:72ch;margin:16px 0 0}
+.tag{display:inline-block;font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.04em;
+     text-transform:uppercase;padding:2px 7px;border-radius:5px;border:1px solid var(--line);
+     color:var(--muted);margin-left:8px;vertical-align:middle}
 .v .badge{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--vc);margin:0 0 4px}
 .v .en{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:none;letter-spacing:0;margin:0 0 7px}
 .v p{font-size:13.5px;color:var(--muted);margin:0}
@@ -91,12 +104,15 @@ h2{font-family:var(--serif);font-size:28px;font-weight:600;margin:0 0 10px;lette
 .bul li{border-left:2px solid var(--line);padding:2px 0 2px 13px;margin:0 0 9px}
 .src{font-family:var(--mono);font-size:12px;color:var(--muted);margin:0 0 4px}
 .claim{font-family:var(--mono);font-size:13.5px;font-weight:600}
-.chip{font-family:var(--mono);font-size:11px;padding:2px 7px;border-radius:5px;margin-left:6px;white-space:nowrap}
+.bul li>div{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px}
+.chip{font-family:var(--mono);font-size:11px;padding:2px 7px;border-radius:5px;white-space:nowrap}
+.claim{overflow-wrap:anywhere}
 .chip.t{color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent)}
 .chip.s{color:var(--entailed);background:var(--entailed-bg);font-weight:600}
 .ident{font-family:var(--mono);font-size:10.5px;color:var(--muted);opacity:.72;margin-top:4px}
 .reason{font-size:12.5px;color:var(--muted);border-top:1px dashed var(--line);padding-top:11px;margin:14px 0 0}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid2>*{min-width:0}
 @media(max-width:640px){.grid2{grid-template-columns:1fr}}
 .cols{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
 @media(max-width:640px){.cols{grid-template-columns:1fr}}
@@ -176,14 +192,90 @@ footer code{font-family:var(--mono);font-size:11.5px}
 <hr class="rule">
 
 <section class="wrap">
-  <p class="kicker">Cztery odpowiedzi, nigdy zmyślenie</p>
+  <p class="kicker">Pięć werdyktów, nigdy zmyślenie</p>
   <h2>Odróżnia „nieprawda” od „nie wiem”.</h2>
+  <p class="sub">Większość systemów ma dwa stany: odpowiedź albo jej brak. Weryta ma pięć, bo
+    „dowody są sprzeczne” to co innego niż „dowodów brak”, a skojarzenie to jeszcze nie twierdzenie.</p>
   <div class="verdicts">
     <div class="v entailed"><div class="badge">Potwierdzone</div><div class="en">Entailed</div><p>Dokument bezpośrednio wspiera odpowiedź — ze źródłem i datami obowiązywania.</p></div>
     <div class="v contradicted"><div class="badge">Sprzeczne z dokumentacją</div><div class="en">Contradicted</div><p>Dokument potwierdza stan przeciwny — wycofanie, zastąpienie.</p></div>
+    <div class="v ambiguous"><div class="badge">Dowody sprzeczne</div><div class="en">Ambiguous</div><p>Korpus zawiera twierdzenie <em>i</em> jego zaprzeczenie na tym samym poziomie szczegółowości. To nie jest brak wiedzy — to konflikt w dokumentach, który ktoś musi rozstrzygnąć.</p></div>
+    <div class="v associated"><div class="badge">Tylko skojarzenie</div><div class="en">Associated</div><p>Nic nie jest twierdzone. Warstwa skojarzeniowa łączy pojęcia i podpowiada, gdzie szukać — to sugestia wyszukiwania, nigdy odpowiedź.</p></div>
     <div class="v unknown"><div class="badge">Nie wiem</div><div class="en">Unknown</div><p>Dostarczony korpus nie zawiera wystarczającego dowodu. Weryta nie zmyśla.</p></div>
-    <div class="v derived"><div class="badge">Potwierdzone — wniosek pośredni</div><div class="en">Derived</div><p>Wniosek z faktów i reguły — pokazany z pełnym łańcuchem, nigdy jako fakt zapisany w źródle.</p></div>
   </div>
+  <p class="note"><b>„Derived” nie jest werdyktem</b>, tylko rodzajem odpowiedzi w pakiecie
+    dowodowym — wnioskiem pośrednim: wyprowadzonym z faktów-rodziców i pokazanym z pełnym
+    łańcuchem oraz regułą, nigdy jako fakt zapisany w źródle.</p>
+</section>
+<hr class="rule">
+
+<section class="wrap" id="egzamin">
+  <p class="kicker">Dlaczego nam wierzyć</p>
+  <h2>Nie deklaracja. Liczba.</h2>
+  <p class="sub">Zewnętrzny benchmark bAbI (Facebook AI): pytania z zadań, których system nigdy
+    nie widział, bez żadnego treningu. Weryta nie jest modelem językowym — nie ma wiedzy
+    z pretreningu, więc każde zdanie spoza gramatyki odrzuca zamiast zgadywać.</p>
+  <div class="metrics">
+    <div class="metric"><div class="n">3 000</div><p class="l">pytań testowych (3 zadania × 1 000)</p></div>
+    <div class="metric"><div class="n">100%</div><p class="l">trafnych odpowiedzi na każdym z zadań</p></div>
+    <div class="metric"><div class="n">0</div><p class="l">twierdzeń bez pokrycia w dowodach</p></div>
+  </div>
+  <p class="note">Zadania: pojedynczy fakt wspierający, wnioskowanie o czasie, dedukcja przez
+    dziedziczenie. Dla porównania: nietrenowany LSTM osiąga tu ok. 50/27/21%.
+    Osobno, w wewnętrznym poligonie na światach generowanych z ukrytej semantyki, której
+    kandydujące reguły nigdy nie widzą, obowiązuje twarda bramka: <b>zero fałszywych twierdzeń</b> —
+    reguła, która choć raz stwierdzi nieprawdę, nie przechodzi, niezależnie od tego, ile zyskuje gdzie indziej.</p>
+  <p class="note">Weryta woli powiedzieć <em>Nie wiem</em> niż zgadywać — i mamy na to liczbę, nie deklarację.</p>
+</section>
+<hr class="rule">
+
+<section class="wrap">
+  <p class="kicker">Dziennik decyzji</p>
+  <h2>Historii, której nie da się cicho przepisać.</h2>
+  <p class="sub">Każda decyzja o przyjęciu lub odrzuceniu faktu trafia do dziennika, w którym
+    <b>każdy wpis pieczętuje poprzedni skrótem kryptograficznym</b>. Wycięcie jednego wiersza albo
+    zmiana jednego znaku rozspójnia cały łańcuch — i widać to natychmiast. Pomyłka nie jest
+    poprawiana przez nadpisanie: jest nowym wpisem.</p>
+  <p class="sub">Głowa łańcucha jest kotwiczona w Bitcoinie przez OpenTimestamps. Nie trzymamy
+    tam żadnych danych — kotwiczymy wyłącznie skrót. <b>Na zewnątrz wychodzą 32 bajty.
+    Twoje dokumenty — nigdy.</b></p>
+  <p class="note">Przepisanie naszej historii wymagałoby podrobienia bloku Bitcoina.
+    Weryfikacja działa offline i przeciwko Twojemu własnemu węzłowi — nie musisz ufać nam,
+    żeby to sprawdzić.</p>
+</section>
+<hr class="rule">
+
+<section class="wrap">
+  <p class="kicker">Drugi świadek</p>
+  <h2>Zgoda dwóch modeli to nie dowód.</h2>
+  <p class="sub">Fakt o dacie wejścia w życie przyjmujemy automatycznie tylko wtedy, gdy
+    niezależnie potwierdzi go <b>państwowy rejestr</b> (Interfejs ELI Sejmu RP). Model może się
+    mylić pewnym głosem; rejestr jest świadkiem, który nie zgaduje.</p>
+  <p class="note">Przypadek z naszego dziennika: model podał datę wejścia w życie
+    <code>2020-01-02</code>, rejestr odpowiedział <code>2020-01-06</code>. Fakt nie wszedł do bazy.
+    Zgoda dwóch modeli to nie dowód. Zgoda z rejestrem państwa — tak.</p>
+</section>
+<hr class="rule">
+
+<section class="wrap">
+  <p class="kicker">Dwie osie czasu</p>
+  <h2>Co obowiązywało wtedy — i co wtedy o tym wiedziano.</h2>
+  <p class="sub">Weryta rozróżnia <b>czas obowiązywania</b> (od kiedy do kiedy przepis obowiązywał)
+    od <b>czasu wiedzy</b> (kiedy my się o tym dowiedzieliśmy). Dzięki temu odpowiada na pytanie,
+    które w audycie pada najczęściej: „co było prawdą 1 marca 2021 według stanu wiedzy
+    z 1 czerwca 2021” — a nie tylko „jak jest dziś”.</p>
+  <p class="note">Dwie osie czasu zna informatyka od dekad (bitemporalność, SQL:2011) i tego nie
+    wymyśliliśmy. Weryta dokłada do nich pakiet dowodowy, który sprawdzisz offline, bez ufania nam.</p>
+</section>
+<hr class="rule">
+
+<section class="wrap">
+  <p class="kicker">Czego potrzebujesz</p>
+  <h2>Zwykły laptop. Bez GPU. Bez chmury.</h2>
+  <p class="sub">Weryta to mała binarka (Rust), która działa offline na sprzęcie, który już masz.
+    Sprawdzenie pakietu dowodowego również nie wymaga karty graficznej ani połączenia z siecią.</p>
+  <p class="note">Mocniejszy sprzęt jest potrzebny wyłącznie wtedy, gdy chcesz uruchomić lokalne
+    modele językowe w potoku uczenia — sama Weryta i weryfikacja dowodów nie.</p>
 </section>
 <hr class="rule">
 
@@ -216,6 +308,45 @@ footer code{font-family:var(--mono);font-size:11.5px}
 <hr class="rule">
 
 <section class="wrap">
+  <p class="kicker">Jak Weryta się uczy</p>
+  <h2>Częste pytanie nie czyni odpowiedzi prawdziwszą.</h2>
+  <p class="sub">System uczy się przez <b>powiększanie zbioru zweryfikowanych faktów</b> — a nie
+    przez strojenie wag na ścieżce odpowiedzi. Warstwa skojarzeniowa pomaga <em>znaleźć</em>
+    właściwe dokumenty; o tym, co zostanie stwierdzone, decyduje wyłącznie dowód.</p>
+  <p class="note">Kanał, przez który częste użycie mogłoby po cichu zmienić werdykt, zmierzyliśmy,
+    uznaliśmy za groźny i zamknęliśmy <b>na poziomie kompilatora</b> — nie regulaminem, tylko typami:
+    pole jest prywatne i tylko do odczytu, więc kod, który mógłby przepisać prawdę użyciem,
+    po prostu się nie skompiluje.</p>
+</section>
+<hr class="rule">
+
+<section class="wrap">
+  <p class="kicker">Nad czym pracujemy</p>
+  <h2>Dokąd sięga dowód.</h2>
+  <div class="cols">
+    <div class="col is">
+      <h3>Podpis wydawcy <span class="tag">w przygotowaniu</span></h3>
+      <ul>
+        <li>Dziennik Ustaw jest publikowany jako PDF z kwalifikowanym podpisem i znacznikiem czasu</li>
+        <li>Sprawdziliśmy narzędziowo, że da się ten podpis zweryfikować na rzeczywistym akcie</li>
+        <li>Docelowo proweniencja faktu sięgnie podpisu <b>wydawcy</b>, nie naszego skrótu</li>
+        <li>Skrót dowodzi, że eksport nie był edytowany; podpis wydawcy dowodzi, kto wydał dokument</li>
+      </ul>
+    </div>
+    <div class="col is">
+      <h3>Unknown z następnym krokiem <span class="tag">kierunek</span></h3>
+      <ul>
+        <li>Zasada: każde „Nie wiem” ma nieść własną ścieżkę rozstrzygnięcia</li>
+        <li>Jaki dokument, badanie albo pomiar zamieniłby je w odpowiedź</li>
+        <li>Mechanizm rankingu luk już działa; pełne wskazanie przy każdym Unknown jest w toku</li>
+        <li>Unknown to nie ślepy zaułek, tylko zadanie do wykonania</li>
+      </ul>
+    </div>
+  </div>
+</section>
+<hr class="rule">
+
+<section class="wrap">
   <p class="kicker">Dla kogo</p>
   <h2>Gdy prawdopodobna odpowiedź to za mało.</h2>
   <p class="who">Zespoły, które żyją w <b>procedurach technicznych i zmianach wersji</b>, <b>decyzjach
@@ -223,6 +354,32 @@ footer code{font-family:var(--mono);font-size:11.5px}
     incydentów</b>, <b>procedurach utrzymania ruchu</b> lub <b>audytach wewnętrznych</b> — gdzie
     realnym pytaniem nie jest „jaka jest odpowiedź”, tylko „pokaż dokument, punkt i wersję
     obowiązującą tego dnia”.</p>
+</section>
+<hr class="rule">
+
+<section class="wrap">
+  <p class="kicker">Współpraca</p>
+  <h2>Budowana z ludźmi, którzy jej używają.</h2>
+  <div class="cols">
+    <div class="col is">
+      <h3>Mikrobiotech</h3>
+      <ul>
+        <li>Praktyka: decyzje administracyjne, katalog odpadów, terminy i wersje</li>
+        <li>Realne zadania jako poligon — to stąd biorą się wymagania na dowód</li>
+        <li>Weryfikacja odpowiedzi przez ludzi, którzy odpowiadają za nie przed urzędem</li>
+      </ul>
+    </div>
+    <div class="col is">
+      <h3>Physix / GirlTech</h3>
+      <ul>
+        <li>Schemat oceny odpowiedzi „Fairy Dice” — prawda i sympatia jako osobne osie</li>
+        <li>Siódmy stan: brak oceny znaczy „nie wiem”, nie „źle”</li>
+        <li>Demo: <a href="https://physix.weryta.pl/">physix.weryta.pl</a></li>
+      </ul>
+    </div>
+  </div>
+  <p class="who" style="margin-top:16px">Współpraca dotyczy metody i weryfikacji — nie zmienia zasady,
+    że <b>tylko zweryfikowany dowód</b> zmienia to, w co system wierzy.</p>
 </section>
 
 <div class="band" id="talk">
