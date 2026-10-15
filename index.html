@@ -178,15 +178,19 @@ const API='https://pop-os.tailaf1556.ts.net/prawo';
 const f=document.getElementById('askf'),q=document.getElementById('askq'),out=document.getElementById('askout');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 f.addEventListener('submit',async e=>{e.preventDefault();const t=q.value.trim();if(!t)return;out.hidden=false;out.innerHTML='<p class="m">Szukam w 54 819 aktach obowiązujących…</p>';
- try{const r=await fetch(API+'/api/ask?q='+encodeURIComponent(t));const d=await r.json();
+ let n=1;try{n=(+sessionStorage.getItem('wn')||0)+1;sessionStorage.setItem('wn',n);}catch(_){}
+ try{const r=await fetch(API+'/api/ask?q='+encodeURIComponent(t)+'&n='+n);const d=await r.json();
   if(!r.ok){out.innerHTML='<p class="m">'+esc(d.co||d.error||'Błąd')+'</p>';return;}
   let h='<p class="m">'+esc(d.komunikat)+' ('+d.ms+' ms)</p>';
   (d.cytaty||[]).slice(0,3).forEach((c,i)=>{const kl=c.brzmienie==='pewne'?'ok':'warn';
-   h+='<div class="r"><b>'+esc(c.tytul||c.akt)+'</b> · '+esc(String(c.eid).replace(/__/g,' ').replace(/_/g,'. '))+'<div class="m">'+esc(c.eli)+' · jednostka '+esc(c.cytat_eid)+' · sha256 '+esc((c.sha256_zrodla||'').slice(0,16))+'…</div><blockquote>„'+esc(c.cytat.slice(0,700))+(c.cytat.length>700?'…':'')+'”</blockquote><div class="m">brzmienie: <span class="'+kl+'">'+esc(c.brzmienie)+'</span></div>'
+   h+='<div class="r"><b>'+esc(c.tytul||c.akt)+'</b> · '+esc(c.adres||String(c.eid).replace(/__/g,' ').replace(/_/g,'. '))+'<div class="m">'+esc(c.eli)+' · jednostka '+esc(c.cytat_eid)+' · sha256 '+esc((c.sha256_zrodla||'').slice(0,16))+'…</div><blockquote>„'+esc(c.cytat.slice(0,700))+(c.cytat.length>700?'…':'')+'”</blockquote><div class="m">brzmienie: <span class="'+kl+'">'+esc(c.brzmienie)+'</span></div>'+(c.przypis?'<div class="tri"><button class="cp" data-i="'+i+'">Kopiuj do pisma</button></div>':'')
    +(i===0?'<div class="tri" data-id="'+esc(d.id)+'">Czy ten przepis odpowiada na pytanie? <button data-o="T">Trafny</button><button data-o="N">Nietrafny</button><button data-o="?">Nie wiem</button></div>':'')+'</div>';});
   (d.akty||[]).slice(0,3).forEach(a=>{h+='<div class="r"><b>'+esc(a.tytul)+'</b><div class="m">'+esc(a.eli)+' · '+esc(a.status)+' · brzmienie: '+esc(a.brzmienie)+' · <a href="'+esc(a.link)+'" rel="noopener" target="_blank">tekst w ELI</a></div></div>';});
   out.innerHTML=h;
-  out.querySelectorAll('.tri button').forEach(b=>b.addEventListener('click',async ev=>{const tri=ev.target.closest('.tri');const body=new URLSearchParams({id:tri.dataset.id,ocena:ev.target.dataset.o});
+  out.querySelectorAll('.cp').forEach(b=>b.addEventListener('click',async()=>{const p=d.cytaty[+b.dataset.i].przypis;
+   try{await navigator.clipboard.writeText(p);b.textContent='Skopiowano ✓ — wklej do pisma';}catch(_){b.outerHTML='<span class="m">Zaznacz i skopiuj:</span><textarea rows="5" style="width:100%">'+esc(p)+'</textarea>';}
+   try{fetch(API+'/ocena',{method:'POST',body:new URLSearchParams({id:d.id,ocena:'K'})});}catch(_){}}));
+  out.querySelectorAll('.tri button:not(.cp)').forEach(b=>b.addEventListener('click',async ev=>{const tri=ev.target.closest('.tri');const body=new URLSearchParams({id:tri.dataset.id,ocena:ev.target.dataset.o});
    try{const rr=await fetch(API+'/ocena',{method:'POST',body});tri.textContent=rr.ok?'Dziękuję — ocena zapisana (tylko litera i id odpowiedzi).':'Nie udało się zapisać oceny.';}catch(_){tri.textContent='Nie udało się zapisać oceny.';}}));
  }catch(_){out.innerHTML='<p class="m">Usługa nie odpowiada. Spróbuj za chwilę.</p>';}
 });
