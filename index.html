@@ -159,7 +159,7 @@ footer code{font-family:var(--mono);font-size:11.5px}
   <div class="ask" id="zapytaj">
     <div class="ask-head"><span class="kicker">Darmowa beta · prawo powszechne</span><span class="ask-note">Wyszukiwarka przepisów z dosłownym cytatem, adresem jednostki i hashem źródła. To nie jest porada prawna. Nie wpisuj danych osobowych.</span></div>
     <form class="ask-form" id="askf"><input id="askq" type="text" maxlength="500" placeholder="np. jaka kara grozi za zabójstwo?" autocomplete="off" required><button class="btn primary" type="submit">Zapytaj</button></form>
-    <div id="askout" class="ask-out" hidden></div>
+    <div id="askout" class="ask-out" role="status" aria-live="polite" hidden></div>
     <details id="zakres" class="ask-note" style="margin-top:10px"><summary>Zakres: akty z pełną treścią przepisów</summary><div>Wczytuję…</div></details>
   </div>
 </div>
@@ -169,7 +169,7 @@ footer code{font-family:var(--mono);font-size:11.5px}
 .ask-form{display:flex;gap:10px;flex-wrap:wrap}.ask-form input{flex:1 1 320px;min-width:0;font:16px/1.4 var(--sans);padding:11px 13px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink)}
 .ask-out{margin:16px 0 0}.ask-out .r{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:10px 0;overflow-wrap:anywhere}
 .ask-out .r b{font-family:var(--serif)}.ask-out .m{font-family:var(--mono);font-size:12px;color:var(--muted)}.ask-out blockquote{margin:8px 0;font-size:15px}
-.ask-out .ok{color:var(--accent)}.ask-out .warn{color:#b7791f}.ask-out .tri{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px;font-size:13px}
+.ask-out .ok{color:var(--accent)}.ask-out .warn{color:#8a5a0f}.ask-out .tri{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px;font-size:13px}
 .ask-out .tri button{font:13px var(--sans);padding:5px 10px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--ink);cursor:pointer}
 .ask-out .tri button:hover{border-color:var(--accent)}
 </style>
@@ -178,23 +178,23 @@ footer code{font-family:var(--mono);font-size:11.5px}
 const API='https://pop-os.tailaf1556.ts.net/prawo';
 const f=document.getElementById('askf'),q=document.getElementById('askq'),out=document.getElementById('askout');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const zk=document.getElementById('zakres');zk.addEventListener('toggle',async()=>{if(!zk.open||zk.dataset.ok)return;try{const z=await (await fetch(API+'/api/zakres')).json();zk.dataset.ok=1;
- zk.lastElementChild.innerHTML='<p>'+z.aktow+' aktów z cytatem dosłownym (stan brzmienia z ISAP: '+esc(z.stan_z)+'). Pozostałe akty z 54 819 obowiązujących: tylko wskazanie aktu, bez cytatu.</p><ul>'+z.akty.map(a=>'<li>'+esc(a.tytul)+' <span class="m">('+esc(a.eli)+')</span></li>').join('')+'</ul>';}catch(_){}});
+const zk=document.getElementById('zakres');zk.addEventListener('toggle',async()=>{if(!zk.open||zk.dataset.ok)return;try{const rz=await fetch(API+'/api/zakres',{signal:AbortSignal.timeout(15000)});if(!rz.ok)throw 0;const z=await rz.json();
+ zk.lastElementChild.innerHTML='<p>'+esc(z.aktow)+' aktów z cytatem dosłownym (stan brzmienia z ISAP: '+esc(z.stan_z)+'). Pozostałe akty z 54 819 obowiązujących: tylko wskazanie aktu, bez cytatu.</p><ul>'+(z.akty||[]).filter(Boolean).map(a=>'<li>'+esc(a.tytul)+' <span class="m">('+esc(a.eli)+')</span></li>').join('')+'</ul>';zk.dataset.ok=1;}catch(_){zk.lastElementChild.innerHTML='<p>Nie udało się wczytać listy — zamknij i otwórz ponownie.</p>';}});
 let seq=0;
 f.addEventListener('submit',async e=>{e.preventDefault();const t=q.value.trim();if(!t)return;const my=++seq;out.hidden=false;out.innerHTML='<p class="m">Szukam w 54 819 aktach obowiązujących…</p>';
  let n=1;try{n=(+sessionStorage.getItem('wn')||0)+1;sessionStorage.setItem('wn',n);}catch(_){}
  try{const r=await fetch(API+'/api/ask?q='+encodeURIComponent(t)+'&n='+n,{signal:AbortSignal.timeout(20000)});let d={};try{d=await r.json();}catch(_){}
   if(my!==seq)return;
   if(!r.ok){const msg=r.status===429?'Za dużo pytań z Twojej sieci — spróbuj za kilka minut.':(r.status>=502&&r.status<=504)?'Usługa właśnie się aktualizuje (zwykle 2–4 min). Spróbuj za chwilę.':(d.co||d.error||'Błąd');out.innerHTML='<p class="m">'+esc(msg)+'</p>';return;}
-  let h='<p class="m">'+esc(d.komunikat)+' ('+d.ms+' ms)</p>';
-  (d.cytaty||[]).filter(Boolean).slice(0,3).forEach((c,i)=>{const kl=/bez zmian/.test(c.stan||'')&&!/UWAGA/.test(c.stan||'')?'ok':'warn';
-   h+='<div class="r"><b>'+esc(c.tytul||c.akt)+'</b> · '+esc(c.adres||String(c.eid).replace(/__/g,' ').replace(/_/g,'. '))+'<div class="m">'+esc(c.eli)+' · jednostka '+esc(c.cytat_eid)+' · sha256 '+esc((c.sha256_zrodla||'').slice(0,16))+'…</div><blockquote>„'+esc(String(c.cytat||'').slice(0,700))+(String(c.cytat||'').length>700?'…':'')+'”</blockquote><div class="m">stan prawny: <span class="'+kl+'">'+esc(c.stan||c.brzmienie)+'</span></div>'+(c.ogloszony||c.obowiazuje_od?'<div class="m">akt ogłoszony '+esc(c.ogloszony||'?')+' · obowiązuje od '+esc(c.obowiazuje_od||'?')+'</div>':'')+(c.przypis?'<div class="tri"><button class="cp" data-i="'+i+'">Kopiuj do pisma</button></div>':'')
-   +(i===0?'<div class="tri" data-id="'+esc(d.id)+'">Czy ten przepis odpowiada na pytanie? <button data-o="T">Trafny</button><button data-o="N">Nietrafny</button><button data-o="?">Nie wiem</button></div>':'')+'</div>';});
-  (d.akty||[]).filter(Boolean).slice(0,3).forEach(a=>{h+='<div class="r"><b>'+esc(a.tytul)+'</b><div class="m">'+esc(a.eli)+' · '+esc(a.status)+' · brzmienie: '+esc(a.brzmienie)+' · <a href="'+esc(a.link)+'" rel="noopener" target="_blank">tekst w ELI</a></div></div>';});
+  let h='<p class="m">'+esc(d.komunikat)+(d.ms!=null?' ('+esc(d.ms)+' ms)':'')+'</p>';
+  (d.cytaty||[]).filter(Boolean).slice(0,3).forEach((c,i)=>{const st=c.stan||c.brzmienie||'';const kl=/bez zmian/.test(st)&&!/UWAGA/.test(st)?'ok':'warn';
+   h+='<div class="r"><b>'+esc(c.tytul||c.akt)+'</b> · '+esc(c.adres||String(c.eid).replace(/__/g,' ').replace(/_/g,'. '))+'<div class="m">'+esc(c.eli)+' · jednostka '+esc(c.cytat_eid)+' · sha256 '+esc((c.sha256_zrodla||'').slice(0,16))+'…</div><blockquote>„'+esc(String(c.cytat||'').slice(0,700))+(String(c.cytat||'').length>700?'…':'')+'”</blockquote><div class="m">stan prawny: <span class="'+kl+'">'+esc(st)+'</span></div>'+(c.ogloszony||c.obowiazuje_od?'<div class="m">akt ogłoszony '+esc(c.ogloszony||'?')+' · obowiązuje od '+esc(c.obowiazuje_od||'?')+'</div>':'')+(c.przypis?'<div class="tri"><button class="cp" data-i="'+i+'">Kopiuj do pisma</button></div>':'')
+   +(i===0&&d.id?'<div class="tri" data-id="'+esc(d.id)+'">Czy ten przepis odpowiada na pytanie? <button data-o="T">Trafny</button><button data-o="N">Nietrafny</button><button data-o="?">Nie wiem</button></div>':'')+'</div>';});
+  (d.akty||[]).filter(Boolean).slice(0,3).forEach(a=>{h+='<div class="r"><b>'+esc(a.tytul)+'</b><div class="m">'+esc(a.eli)+' · '+esc(a.status)+' · brzmienie: '+esc(a.brzmienie)+' · '+(/^https?:\/\//.test(a.link||'')?'<a href="'+esc(a.link)+'" rel="noopener" target="_blank">tekst w ELI</a>':esc(a.eli))+'</div></div>';});
   out.innerHTML=h;
   out.querySelectorAll('.cp').forEach(b=>b.addEventListener('click',async()=>{const p=d.cytaty[+b.dataset.i].przypis;
    try{await navigator.clipboard.writeText(p);b.textContent='Skopiowano ✓ — wklej do pisma';}catch(_){b.outerHTML='<span class="m">Zaznacz i skopiuj:</span><textarea rows="5" style="width:100%">'+esc(p)+'</textarea>';}
-   try{fetch(API+'/ocena',{method:'POST',body:new URLSearchParams({id:d.id,ocena:'K'})});}catch(_){}}));
+   if(d.id)fetch(API+'/ocena',{method:'POST',body:new URLSearchParams({id:d.id,ocena:'K'})}).catch(()=>{});}));
   out.querySelectorAll('.tri button:not(.cp)').forEach(b=>b.addEventListener('click',async ev=>{const tri=ev.target.closest('.tri');const body=new URLSearchParams({id:tri.dataset.id,ocena:ev.target.dataset.o});
    try{const rr=await fetch(API+'/ocena',{method:'POST',body});tri.textContent=rr.ok?'Dziękuję — ocena zapisana (tylko litera i id odpowiedzi).':'Nie udało się zapisać oceny.';}catch(_){tri.textContent='Nie udało się zapisać oceny.';}}));
  }catch(err){if(my!==seq)return;out.innerHTML='<p class="m">'+(err&&(err.name==='TimeoutError'||err.name==='AbortError')?'Odpowiedź trwa zbyt długo. Spróbuj ponownie za chwilę.':'Usługa nie odpowiada. Spróbuj za chwilę.')+'</p>';}
