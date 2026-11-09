@@ -170,8 +170,10 @@ footer code{font-family:var(--mono);font-size:11.5px}
 .ask-out{margin:16px 0 0}.ask-out .r{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:10px 0;overflow-wrap:anywhere}
 .ask-out .r b{font-family:var(--serif)}.ask-out .m{font-family:var(--mono);font-size:12px;color:var(--muted)}.ask-out blockquote{margin:8px 0;font-size:15px}
 .ask-out .ok{color:var(--accent)}.ask-out .warn{color:#8a5a0f}.ask-out .tri{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px;font-size:13px}
-.ask-out .tri button{font:13px var(--sans);padding:5px 10px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--ink);cursor:pointer}
-.ask-out .tri button:hover{border-color:var(--accent)}
+.ask-out .tri button,.ask-out .dt button{font:13px var(--sans);padding:5px 10px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--ink);cursor:pointer}
+.ask-out .tri button:hover,.ask-out .dt button:hover{border-color:var(--accent)}
+.ask-out .dt{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0;font-size:14px}.ask-out .dt input{font:14px var(--sans);padding:5px 8px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink)}
+.ask-out details ul{margin:4px 0 0;padding-left:18px}.ask-out summary{cursor:pointer}
 </style>
 <script>
 (function(){
@@ -187,11 +189,15 @@ f.addEventListener('submit',async e=>{e.preventDefault();const t=q.value.trim();
   if(my!==seq)return;
   if(!r.ok){const msg=r.status===429?'Za dużo pytań z Twojej sieci — spróbuj za kilka minut.':(r.status>=502&&r.status<=504)?'Usługa właśnie się aktualizuje (zwykle 2–4 min). Spróbuj za chwilę.':(d.co||d.error||'Błąd');out.innerHTML='<p class="m">'+esc(msg)+'</p>';return;}
   let h='<p class="m">'+esc(d.komunikat)+(d.ms!=null?' ('+esc(d.ms)+' ms)':'')+'</p>';
-  (d.cytaty||[]).filter(Boolean).slice(0,3).forEach((c,i)=>{const st=c.stan||c.brzmienie||'';const kl=/bez zmian/.test(st)&&!/UWAGA/.test(st)?'ok':'warn';
-   h+='<div class="r"><b>'+esc(c.tytul||c.akt)+'</b> · '+esc(c.adres||String(c.eid).replace(/__/g,' ').replace(/_/g,'. '))+'<div class="m">'+esc(c.eli)+' · jednostka '+esc(c.cytat_eid)+' · sha256 '+esc((c.sha256_zrodla||'').slice(0,16))+'…</div><blockquote>„'+esc(String(c.cytat||'').slice(0,700))+(String(c.cytat||'').length>700?'…':'')+'”</blockquote><div class="m">stan prawny: <span class="'+kl+'">'+esc(st)+'</span></div>'+(c.ogloszony||c.obowiazuje_od?'<div class="m">akt ogłoszony '+esc(c.ogloszony||'?')+' · obowiązuje od '+esc(c.obowiazuje_od||'?')+'</div>':'')+(c.przypis?'<div class="tri"><button class="cp" data-i="'+i+'">Kopiuj do pisma</button></div>':'')
+  const nie=!!d.pewnosc&&d.pewnosc!=='pewna',tm=d.temporal||{};
+  if(nie)h+='<p class="warn"><b>Dopasowanie wyszukiwarki — sprawdź</b> (pewność: '+esc(d.pewnosc)+'). Pierwszy wynik może nie odpowiadać na pytanie.</p>';
+  if(tm.kod==='OFFENSE_DATE_CLARIFICATION')h+='<form class="dt"><label>'+esc(tm.pytanie||'Kiedy popełniono czyn?')+' <input type="date" required max="'+new Date().toISOString().slice(0,10)+'"></label><button>Pokaż brzmienie z tej daty</button></form>';
+  (d.cytaty||[]).filter(Boolean).slice(0,3).forEach((c,i)=>{const st=c.stan||c.brzmienie||'';const kl=/bez zmian/.test(st)&&!/UWAGA/.test(st)?'ok':'warn';const w=c.wersja||{},wv=(w.dostepne_wersje||[]).filter(Boolean);
+   h+='<div class="r"><b>'+esc(c.tytul||c.akt)+'</b> · '+esc(c.adres||String(c.eid).replace(/__/g,' ').replace(/_/g,'. '))+'<div class="m">'+esc(c.eli)+' · jednostka '+esc(c.cytat_eid)+' · sha256 '+esc((c.sha256_zrodla||'').slice(0,16))+'…</div><blockquote>„'+esc(String(c.cytat||'').slice(0,700))+(String(c.cytat||'').length>700?'…':'')+'”</blockquote><div class="m">stan prawny: <span class="'+kl+'">'+esc(st)+'</span></div>'+(c.ogloszony||c.obowiazuje_od?'<div class="m">akt ogłoszony '+esc(c.ogloszony||'?')+' · obowiązuje od '+esc(c.obowiazuje_od||'?')+'</div>':'')+(w.stan_na?'<div class="m">stan tekstu w indeksie: '+esc(w.stan_na)+'</div>':'')+(wv.length?'<details class="m"><summary>dostępne wersje tekstu ('+wv.length+')</summary><ul>'+wv.map(v=>'<li>'+esc(v.akt)+' · stan na '+esc(v.stan_na)+'</li>').join('')+'</ul></details>':'')+(c.przypis?'<div class="tri">'+(nie?'<span class="warn">dopasowanie wyszukiwarki — sprawdź</span>':'')+'<button class="cp" data-i="'+i+'">Kopiuj do pisma</button></div>':'')
    +(i===0&&d.id?'<div class="tri" data-id="'+esc(d.id)+'">Czy ten przepis odpowiada na pytanie? <button data-o="T">Trafny</button><button data-o="N">Nietrafny</button><button data-o="?">Nie wiem</button></div>':'')+'</div>';});
   (d.akty||[]).filter(Boolean).slice(0,3).forEach(a=>{h+='<div class="r"><b>'+esc(a.tytul)+'</b><div class="m">'+esc(a.eli)+' · '+esc(a.status)+' · brzmienie: '+esc(a.brzmienie)+' · '+(/^https?:\/\//.test(a.link||'')?'<a href="'+esc(a.link)+'" rel="noopener" target="_blank">tekst w ELI</a>':esc(a.eli))+'</div></div>';});
   out.innerHTML=h;
+  const dt=out.querySelector('.dt');if(dt)dt.addEventListener('submit',ev=>{ev.preventDefault();const[y,m,dd]=dt.querySelector('input').value.split('-');q.value=t+' w dniu '+dd+'.'+m+'.'+y+' r.';f.requestSubmit();});
   out.querySelectorAll('.cp').forEach(b=>b.addEventListener('click',async()=>{const p=d.cytaty[+b.dataset.i].przypis;
    try{await navigator.clipboard.writeText(p);b.textContent='Skopiowano ✓ — wklej do pisma';}catch(_){b.outerHTML='<span class="m">Zaznacz i skopiuj:</span><textarea rows="5" style="width:100%">'+esc(p)+'</textarea>';}
    if(d.id)fetch(API+'/ocena',{method:'POST',body:new URLSearchParams({id:d.id,ocena:'K'})}).catch(()=>{});}));
