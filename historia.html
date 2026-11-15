@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Historia przepisu — Weryta</title>
+<style>
+:root{--bg:#fbfaf7;--fg:#1c1c1a;--mut:#6b6a64;--ln:#e2e0d8;--card:#fff;--acc:#2b5fa8;--a:#b4572b;--b:#2b6fa8;
+--del:#a8322d;--del-bg:#fbe3e1;--ins:#1f6e45;--ins-bg:#dff2e6;--unk:#ecebe6;--warn:#f6e7bf;--warn-fg:#7a5a00}
+@media (prefers-color-scheme:dark){:root{--bg:#141413;--fg:#ecebe6;--mut:#a09f98;--ln:#34332f;--card:#1c1c1a;--acc:#8fb5ef;--a:#f0a07a;--b:#86b9ef;
+--del:#f3a19b;--del-bg:#45201d;--ins:#8fdcae;--ins-bg:#173524;--unk:#2a2926;--warn:#3a2f12;--warn-fg:#e8c868}}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;margin:0;padding:16px}
+main{max-width:1180px;margin:0 auto}
+a{color:var(--acc)}
+.wroc{font-size:.85rem;display:inline-block;margin:0 0 8px}
+h1{font-size:1.45rem;margin:0 0 2px}
+.sub{color:var(--mut);margin:0 0 14px;font-size:.9rem}
+.bar{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:end;margin:0 0 14px}
+.bar label{display:flex;flex-direction:column;font-size:.8rem;color:var(--mut);gap:3px}
+select,input[type=date]{font:inherit;color:var(--fg);background:var(--card);border:1px solid var(--ln);border-radius:7px;padding:5px 8px}
+.ka{color:var(--a);font-weight:700}.kb{color:var(--b);font-weight:700}
+.grid{display:grid;grid-template-columns:1fr 210px 1fr;gap:12px;align-items:start}
+@media (max-width:700px){.grid{grid-template-columns:1fr 46px 1fr;gap:6px}.etk,.znac .d{display:none}.kol{padding:9px 9px;font-size:.86rem}.j.zmieniona{margin-left:-9px;padding-left:6px}}
+/* oś na środku: A wystaje w lewo (do kolumny A), B w prawo (do kolumny B) */
+.os{position:sticky;top:12px;height:min(78vh,720px);user-select:none;touch-action:none}
+.tor{position:absolute;left:calc(50% - 3px);top:8px;bottom:8px;width:6px;border-radius:3px;background:var(--ln)}
+.pas{position:absolute;left:calc(50% - 3px);width:6px;border-radius:3px}
+.pas.unk{background:repeating-linear-gradient(0deg,var(--mut) 0 3px,transparent 3px 6px);opacity:.5}
+.pas.warn{background:var(--warn-fg);opacity:.55}
+.pkt{position:absolute;left:calc(50% - 9px);width:18px;height:18px;margin-top:-9px;border-radius:50%;background:var(--card);border:3px solid var(--acc);cursor:pointer;padding:0;z-index:1}
+.pkt.niepewny{border-style:dashed}
+.tj{position:absolute;left:calc(50% - 7px);width:14px;height:2px;background:var(--mut);opacity:.6}
+.etk{position:absolute;left:calc(50% + 14px);font-size:.72rem;color:var(--mut);white-space:nowrap;margin-top:-.6em}
+.etk.zm{color:var(--fg);font-weight:600}
+.znac{position:absolute;height:0;cursor:grab;display:flex;align-items:center;z-index:2}
+.znac.A{right:calc(50% + 10px);flex-direction:row-reverse}
+.znac.B{left:calc(50% + 10px)}
+.znac b{display:inline-block;min-width:26px;padding:2px 6px;border-radius:6px;color:#fff;font-size:.78rem;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.znac::before{content:"";position:absolute;width:12px;height:2px}
+.znac.A::before{right:-10px;background:var(--a)}.znac.B::before{left:-10px;background:var(--b)}
+.znac.A b{background:var(--a)}.znac.B b{background:var(--b)}
+.znac:active{cursor:grabbing}
+.znac .d{margin:0 5px;font-size:.72rem;color:var(--mut);white-space:nowrap;background:var(--bg);border-radius:4px;padding:0 3px}
+/* kolumny */
+.kol{background:var(--card);border:1px solid var(--ln);border-radius:10px;padding:12px 14px;min-width:0}
+.kol h2{font-size:1rem;margin:0 0 8px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.kol h2 small{font-weight:400;color:var(--mut)}
+.j{padding:7px 0;border-top:1px solid var(--ln)}
+.j:first-of-type{border-top:0}
+.j .ad{font-weight:600;font-size:.86rem}
+.j .meta{font-size:.74rem;color:var(--mut)}
+.j.zmieniona{border-left:3px solid var(--acc);padding-left:9px;margin-left:-12px}
+.j.brak .t,.j.unk .t{color:var(--mut);font-style:italic}
+.j.unk .t{background:var(--unk);border-radius:4px;padding:1px 5px}
+del{color:var(--del);background:var(--del-bg);text-decoration:line-through;border-radius:3px}
+ins{color:var(--ins);background:var(--ins-bg);text-decoration:none;border-radius:3px}
+.uw{background:var(--warn);color:var(--warn-fg);border-radius:8px;padding:8px 12px;font-size:.85rem;margin:0 0 12px}
+.leg{font-size:.78rem;color:var(--mut);margin:12px 0 0;display:flex;flex-wrap:wrap;gap:6px 16px}
+.zmiany{font-size:.85rem;margin:14px 0 0}
+.zmiany li{margin:3px 0}
+footer{margin-top:24px;color:var(--mut);font-size:.8rem}
+</style>
+</head>
+<body>
+<main>
+<a class="wroc" id="wroc" href="./">← Weryta</a>
+<h1 id="tyt"></h1>
+<p class="sub" id="sub"></p>
+<div class="bar" id="bar" hidden>
+  <label><span><span class="ka">A</span> — <span id="lA"></span></span><input type="date" id="dA"></label>
+  <label><span><span class="kb">B</span> — <span id="lB"></span></span><input type="date" id="dB"></label>
+</div>
+<div class="uw" id="uw" hidden></div>
+<div class="grid" id="grid" hidden>
+  <section class="kol colA" id="kA" lang="pl"></section>
+  <div class="os" id="os"></div>
+  <section class="kol colB" id="kB" lang="pl"></section>
+</div>
+<div class="leg" id="leg" hidden></div>
+<ul class="zmiany" id="zm"></ul>
+<footer id="stopka"></footer>
+</main>
+<script>
+"use strict";
+// Oś czasu jednego artykułu z /api/wersje (oś Weryty z łańcucha tekstów jednolitych). Wspólny plik weryta.pl / weryta.com.
+// ?eli=DU/1997/553&art=art_148[&data=RRRR-MM-DD → znacznik A][&lang=en]. Adres API stały: parametr ?api= z prototypu
+// usunięty, żeby link nie mógł podstawić cudzych danych jako „tekstu prawa” na tej domenie.
+const API='https://pop-os.tailaf1556.ts.net/prawo';
+const P = new URLSearchParams(location.search);
+const EN = /weryta\.com$/.test(location.hostname) || P.get("lang") === "en";
+const T = EN ? {
+  tytul: "Provision history", hist: " — provision history", lA: "e.g. date of the offence", lB: "e.g. today",
+  sub: 'Drag markers <span class="ka">A</span> and <span class="kb">B</span> on the timeline, click a change point or enter dates. The columns show the Polish wording in force on those days; differences are marked.',
+  roznic: n => n + " unit" + (n === 1 ? "" : "s") + " differ from ", bez: "no differences", brak: "— not in force on that day",
+  nieznane: "wording unknown (before the first consolidated text)", uchylony: "repealed", od: "from ", do: "until ",
+  zmiana: "amended by: Dz.U. ", poz: " item ", niepewne: "date within a range — uncertain", dzis: "today",
+  uw: (d, l) => `Amendments entered into force after the last consolidated text (from ${d}): ${l}. The wording after that date may be out of date.`,
+  zmTyt: "Changes to this article:", zmBrak: "No changes on the timeline.",
+  leg: ['<del>struck</del> = not in B', '<ins>added</ins> = new in B', '● point = wording change (dashed = date within a range)',
+    '— tick = consolidated text', 'hatched band = wording partly unknown', 'yellow band = amendments after the last consolidated text'],
+  stopka: "Source: Weryta timeline built from the chain of consolidated texts (ISAP). Verbatim Polish text, no LLM, no translation. The comparison shows wordings only — deciding which law is more lenient (Art. 4 § 1 of the Polish Criminal Code) is for a lawyer.",
+  bladBrak: "No timeline for this act yet. Available: ", bladSiec: "Could not load the timeline — please try again shortly.", bladParam: "Missing or invalid article in the link.",
+  osAria: "Timeline: marker A on the left, B on the right",
+  rodzaj: {dodany: "added", zmieniony: "amended", uchylony: "repealed", nieznany: "unknown change"}
+} : {
+  tytul: "Historia przepisu", hist: " — historia przepisu", lA: "np. dzień czynu", lB: "np. dziś",
+  sub: 'Przesuń znaczniki <span class="ka">A</span> i <span class="kb">B</span> na osi, kliknij punkt zmiany albo wpisz daty. Kolumny pokazują brzmienie z tych dni, a różnice są zaznaczone.',
+  roznic: n => n + " jedn. różni się od ", bez: "bez różnic", brak: "— nie obowiązywał w tym dniu",
+  nieznane: "brzmienie nieznane (sprzed pierwszego tekstu jednolitego)", uchylony: "uchylony", od: "od ", do: "do ",
+  zmiana: "zmiana: Dz.U. ", poz: " poz. ", niepewne: "data w przedziale — niepewne", dzis: "dziś",
+  uw: (d, l) => `Po ostatnim tekście jednolitym od ${d} weszły nowelizacje (${l}). Brzmienie po tej dacie może być nieaktualne.`,
+  zmTyt: "Zmiany tego artykułu:", zmBrak: "Brak zmian w osi czasu.",
+  leg: ['<del>skreślone</del> = nie ma tego w B', '<ins>dodane</ins> = nowe w B', '● punkt = zmiana brzmienia (przerywany = data z przedziału)',
+    '— kreska = tekst jednolity', 'pas kreskowany = brzmienie częściowo nieznane', 'pas żółty = po ostatnim t.j. weszły nowelizacje'],
+  stopka: "Źródło: oś czasu Weryty z łańcucha tekstów jednolitych (ISAP). Tekst dosłowny, bez LLM. Porównanie pokazuje brzmienia — ocena, która ustawa jest względniejsza (art. 4 § 1 k.k.), należy do prawnika.",
+  bladBrak: "Dla tego aktu nie ma jeszcze osi czasu. Dostępne: ", bladSiec: "Nie udało się wczytać osi czasu — spróbuj za chwilę.", bladParam: "Brak albo błędny artykuł w linku.",
+  osAria: "Oś czasu: znacznik A po lewej, B po prawej",
+  rodzaj: {}
+};
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const _n = new Date(), dzis = new Date(_n - _n.getTimezoneOffset() * 6e4).toISOString().slice(0, 10);   // lokalna data
+let D = null, t0, t1, A, B;
+
+const ms = s => Date.parse(s + "T00:00:00Z");
+const iso = t => new Date(t).toISOString().slice(0, 10);
+const pl = s => s ? s.split("-").reverse().join(".") : T.dzis;
+const dzu = p => T.zmiana + p.replace("DU/", "").replace("/", T.poz);
+
+function wersjaNa(j, d) {   // -> {v, status}: pewne | niepewne | brak
+  let pewne = null, mozl = null;
+  for (const v of j.wersje) {
+    const odLo = v.od || (v.od_przedzial || [])[0], odHi = v.od || (v.od_przedzial || [])[1];
+    const doLo = v.do || (v.do_przedzial || [])[0] || "9999-12-31", doHi = v.do || (v.do_przedzial || [])[1] || "9999-12-31";
+    if (odHi <= d && d <= doLo) pewne = v;
+    else if (odLo <= d && d <= doHi) mozl = v;
+  }
+  if (pewne) return {v: pewne, status: "pewne"};
+  if (mozl) return {v: mozl, status: "niepewne"};
+  return {v: null, status: "brak"};
+}
+
+function slowa(t) { return (t || "").split(/(\s+)/).filter(x => x !== ""); }
+function diff(a, b) {   // LCS na słowach -> [[op, tok]] op: = - +
+  const x = slowa(a), y = slowa(b), n = x.length, m = y.length;
+  if (n * m > 400000) return [["-", a], ["+", b]];   // ponytail: bardzo długie jednostki bez diffu słownego
+  const L = Array.from({length: n + 1}, () => new Uint16Array(m + 1));
+  for (let i = n - 1; i >= 0; i--) for (let k = m - 1; k >= 0; k--)
+    L[i][k] = x[i] === y[k] ? L[i + 1][k + 1] + 1 : Math.max(L[i + 1][k], L[i][k + 1]);
+  const out = []; let i = 0, k = 0;
+  while (i < n && k < m) {
+    if (x[i] === y[k]) { out.push(["=", x[i]]); i++; k++; }
+    else if (L[i + 1][k] >= L[i][k + 1]) out.push(["-", x[i++]]);
+    else out.push(["+", y[k++]]);
+  }
+  while (i < n) out.push(["-", x[i++]]);
+  while (k < m) out.push(["+", y[k++]]);
+  return out;
+}
+function html(ops, strona) {   // strona A: pokaż = i -, strona B: pokaż = i +
+  return ops.map(([o, t]) => o === "=" ? esc(t) : (strona === "A" && o === "-") ? `<del>${esc(t)}</del>`
+    : (strona === "B" && o === "+") ? `<ins>${esc(t)}</ins>` : "").join("");
+}
+
+// Różnica liczona symetrycznie: jednostka, której w jednym dniu nie ma, a w drugim ma tekst, to różnica po OBU stronach
+// (prototyp liczył ją tylko po stronie z tekstem: „A: 13 jedn. różni się od B” obok „B: 67 … od A”).
+function rozne(s, o) {
+  const ta = s.v && s.v.tekst, tb = o.v && o.v.tekst;
+  if (ta && tb) return ta !== tb;
+  return (s.status === "brak" && !!tb) || (o.status === "brak" && !!ta);
+}
+function kolumna(el, lit, d, inna) {
+  let zmian = 0;
+  const wiersze = D.jednostki.map(j => {
+    const s = wersjaNa(j, d), o = wersjaNa(j, inna);
+    if (j.typ === "artykul" && !(s.v && s.v.tekst) && !(o.v && o.v.tekst)) return "";   // nagłówek artykułu bez własnego tekstu
+    const ta = s.v ? s.v.tekst : null, tb = o.v ? o.v.tekst : null, r = rozne(s, o);
+    if (r) zmian++;
+    let kl = "j" + (r ? " zmieniona" : ""), tekst;
+    if (s.status === "brak") { kl += " brak"; tekst = T.brak; }
+    else if (!ta) { kl += " unk"; tekst = T.nieznane; }
+    else if (tb && ta !== tb) tekst = html(lit === "A" ? diff(ta, tb) : diff(tb, ta), lit);
+    else tekst = esc(ta);
+    const v = s.v || {};
+    const meta = s.status === "brak" ? "" : [v.uchylony ? T.uchylony : "", v.od ? T.od + pl(v.od) : v.od_przedzial ? T.od + `${pl(v.od_przedzial[0])}–${pl(v.od_przedzial[1])}` : "",
+      v.do ? T.do + pl(v.do) : "", v.podstawa_zmiany ? dzu(v.podstawa_zmiany) : "",
+      s.status === "niepewne" ? T.niepewne : ""].filter(Boolean).join(" · ");
+    return `<div class="${kl}"><div class="ad">${esc(j.adres)}</div><div class="t">${tekst}</div>${meta ? `<div class="meta" lang="${EN ? "en" : "pl"}">${esc(meta)}</div>` : ""}</div>`;
+  }).join("");
+  const kol = lit === "A" ? "ka" : "kb";
+  el.innerHTML = `<h2 lang="${EN ? "en" : "pl"}"><span><span class="${kol}">${lit}</span> · ${pl(d)}</span><small>${zmian ? T.roznic(zmian) + (lit === "A" ? "B" : "A") : T.bez}</small></h2>${wiersze}`;
+}
+
+function y(d) { const h = $("os").clientHeight - 16; return 8 + (ms(d) - t0) / (t1 - t0) * h; }
+function dataZ(py) { const h = $("os").clientHeight - 16; const t = t0 + Math.min(1, Math.max(0, (py - 8) / h)) * (t1 - t0); return iso(t); }
+
+function rysujOs() {
+  const os = $("os"); os.innerHTML = '<div class="tor"></div>';
+  const add = (cls, top, extra = "") => { const e = document.createElement("div"); e.className = cls; e.style.top = top + "px"; e.innerHTML = extra; os.appendChild(e); return e; };
+  // pasy: nieznane brzmienie (unia okien z tekstem null), możliwie nieaktualne (po ostatnim t.j.)
+  for (const j of D.jednostki) for (const v of j.wersje) if (!v.tekst && v.od && j.typ !== "artykul") {
+    const e = add("pas unk", y(v.od)); e.style.height = Math.max(2, y(v.do || dzis) - y(v.od)) + "px"; }
+  if (D.mozliwie_nieaktualne_od) { const e = add("pas warn", y(D.mozliwie_nieaktualne_od)); e.style.height = Math.max(2, y(dzis) - y(D.mozliwie_nieaktualne_od)) + "px"; }
+  for (const t of D.teksty_jednolite) if (t.data) add("tj", y(t.data)).title = `t.j. Dz.U. ${t.eli}`;
+  const etk = [[D.obowiazuje_od, pl(D.obowiazuje_od), "zm"], [dzis, T.dzis, ""]];
+  for (const p of D.punkty) {
+    const b = document.createElement("button"); b.className = "pkt" + (p.zmiany.some(z => !z.pewna) ? " niepewny" : "");
+    b.style.top = y(p.data) + "px"; b.title = `${pl(p.data)}: ${p.zmiany.length} (${[...new Set(p.zmiany.map(z => z.podstawa).filter(Boolean))].join(", ")})`;
+    b.setAttribute("aria-label", b.title);
+    b.onclick = () => { // klik: ustaw bliższy znacznik na dzień zmiany (A przed zmianą, B od zmiany)
+      const przed = iso(ms(p.data) - 864e5);
+      if (Math.abs(ms(A) - ms(p.data)) <= Math.abs(ms(B) - ms(p.data))) A = przed; else B = p.data;
+      if (A > B) [A, B] = [B, A]; odswiez(); };
+    os.appendChild(b); etk.push([p.data, pl(p.data), "zm"]);
+  }
+  let ost = -99;   // etykiety bez nakładania
+  for (const [d, t, c] of etk.sort((a, b) => a[0] < b[0] ? -1 : 1)) { const yy = y(d); if (yy - ost < 14) continue; add("etk " + c, yy, esc(t)); ost = yy; }
+  for (const lit of ["A", "B"]) {
+    const z = add("znac " + lit, y(lit === "A" ? A : B), `<b>${lit}</b><span class="d"></span>`); z.id = "z" + lit;
+    z.onpointerdown = ev => { z.setPointerCapture(ev.pointerId); z.onpointermove = e2 => {
+      const r = os.getBoundingClientRect(); const d = dataZ(e2.clientY - r.top); if (lit === "A") A = d; else B = d; odswiez(false); }; };
+    z.onpointerup = () => { z.onpointermove = null; };
+  }
+}
+
+function odswiez(cale = true) {
+  $("dA").value = A; $("dB").value = B;
+  for (const lit of ["A", "B"]) { const z = $("z" + lit); if (z) { const d = lit === "A" ? A : B; z.style.top = y(d) + "px"; z.querySelector(".d").textContent = pl(d); } }
+  kolumna($("kA"), "A", A, B); kolumna($("kB"), "B", B, A);
+  const nieakt = D.mozliwie_nieaktualne_od && (A >= D.mozliwie_nieaktualne_od || B >= D.mozliwie_nieaktualne_od);
+  $("uw").hidden = !nieakt;
+  if (nieakt) $("uw").textContent = T.uw(pl(D.mozliwie_nieaktualne_od), (D.zmiany_po_ostatnim_tj || []).map(z => z.eli).join(", "));
+  if (cale) $("zm").innerHTML = D.punkty.length ? `<b>${T.zmTyt}</b>` + D.punkty.map(p =>
+    `<li>${pl(p.data)} — ${p.zmiany.map(z => `${esc(D.jednostki.find(j => j.eid === z.eid)?.adres || z.eid)} (${esc(T.rodzaj[z.rodzaj] || z.rodzaj)})`).join(", ")}${p.zmiany[0].podstawa ? ` — ${esc(dzu(p.zmiany[0].podstawa))}` : ""}</li>`).join("") : `<li>${T.zmBrak}</li>`;
+}
+
+function blad(msg) { $("sub").textContent = msg; }
+
+function ustaw(dane, dataA) {
+  D = dane; t0 = ms(D.obowiazuje_od); t1 = ms(dzis);
+  $("tyt").textContent = D.adres + T.hist; document.title = D.adres + T.hist + " — Weryta";
+  $("sub").innerHTML = `<span lang="pl">${esc(D.tytul)}</span> · ${T.sub}`;
+  const ost = D.punkty.length ? D.punkty[D.punkty.length - 1].data : null;
+  A = /^\d{4}-\d\d-\d\d$/.test(dataA || "") && dataA >= D.obowiazuje_od && dataA <= dzis ? dataA : ost ? iso(ms(ost) - 864e5) : D.obowiazuje_od;
+  B = dzis;
+  $("dA").min = $("dB").min = D.obowiazuje_od; $("dA").max = $("dB").max = dzis;
+  $("bar").hidden = $("grid").hidden = $("leg").hidden = false;
+  rysujOs(); odswiez();
+}
+
+$("dA").onchange = e => { if (e.target.value) { A = e.target.value; odswiez(); } };
+$("dB").onchange = e => { if (e.target.value) { B = e.target.value; odswiez(); } };
+window.addEventListener("resize", () => D && (rysujOs(), odswiez(false)));
+
+(async function start() {
+  document.documentElement.lang = EN ? "en" : "pl";
+  $("tyt").textContent = T.tytul; $("lA").textContent = T.lA; $("lB").textContent = T.lB;
+  $("os").setAttribute("aria-label", T.osAria); $("stopka").textContent = T.stopka;
+  $("leg").innerHTML = T.leg.map(x => `<span>${x}</span>`).join("");
+  if (EN && !/weryta\.com$/.test(location.hostname)) $("wroc").href = "./?lang=en";
+  const eli = P.get("eli") || "", art = P.get("art") || "";
+  if (!/^(DU|MP)\/\d{4}\/\d+$/.test(eli) || !/^art_\w+$/.test(art)) return blad(T.bladParam);
+  try {
+    const r = await fetch(`${API}/api/wersje?eli=${encodeURIComponent(eli)}&art=${encodeURIComponent(art)}`, {signal: AbortSignal.timeout(20000)});
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || !j.jednostki) return blad(j.osie_dostepne ? T.bladBrak + j.osie_dostepne.join(", ") : (j.error || T.bladSiec));
+    ustaw(j, P.get("data"));
+  } catch (_) { blad(T.bladSiec); }
+})();
+</script>
+</body>
+</html>
