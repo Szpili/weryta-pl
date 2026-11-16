@@ -17,7 +17,7 @@ f.addEventListener('submit',async e=>{e.preventDefault();const t=q.value.trim();
   let h='<p class="m">'+esc(d.komunikat)+(d.ms!=null?' ('+esc(d.ms)+' ms)':'')+'</p>';
   if(S.lang==='en'&&d.pytanie_pl)h+='<p class="m">'+T.szukaneJako+esc(d.pytanie_pl)+'</p>';
   const nie=!!d.pewnosc&&d.pewnosc!=='pewna',tm=d.temporal||{};
-  if(nie)h+='<p class="warn"><b>'+T.slabe+'</b> ('+T.pewnosc+esc(d.pewnosc)+').'+((d.cytaty||[]).some(Boolean)?' '+T.pierwszyWynik:'')+'</p>';
+  if(nie)h+='<p class="warn"><b>'+T.slabe+'</b> ('+T.pewnosc+esc((T.pewnoscWart||{})[d.pewnosc]||d.pewnosc)+').'+((d.cytaty||[]).some(Boolean)?' '+T.pierwszyWynik:'')+'</p>';
   if(tm.kod==='OFFENSE_DATE_CLARIFICATION')h+='<form class="dt"><label>'+esc((S.lang==='en'?'':tm.pytanie)||T.dataPytanie)+' <input type="date" required max="'+new Date().toISOString().slice(0,10)+'"></label><button>'+T.dataPrzycisk+'</button></form>';
   (d.cytaty||[]).filter(Boolean).slice(0,3).forEach((c,i)=>{const st=c.stan||c.brzmienie||'';const kl=/bez zmian/.test(st)&&!/UWAGA/.test(st)?'ok':'warn';const w=c.wersja||{},wv=(w.dostepne_wersje||[]).filter(Boolean);
    const bq=t=>'<blockquote'+(S.lang==='en'?' lang="pl"':'')+'>„'+esc(String(t||'').slice(0,700))+(String(t||'').length>700?'…':'')+'”</blockquote>';
